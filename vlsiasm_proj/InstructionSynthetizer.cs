@@ -35,7 +35,7 @@ namespace vlsiasm {
                     sb.Append(desc.opcode).Append(intToBinary(desc.rd, 5)).Append('0', 21);
                     break;
                 case InstructionType.RSR:
-                    sb.Append(desc.opcode).Append('0', 5).Append(intToBinary(desc.rd, 5)).Append('0', 16);
+                    sb.Append(desc.opcode).Append('0', 5).Append(intToBinary(desc.rs1, 5)).Append('0', 16);
                     break;
                 case InstructionType.RSI:
                     sb.Append(desc.opcode).Append('0', 5).Append(intToBinary(desc.rs1, 5)).Append(intToBinary(desc.immediate, 16));

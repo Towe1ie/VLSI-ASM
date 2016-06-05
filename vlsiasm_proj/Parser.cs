@@ -10,6 +10,7 @@ namespace vlsiasm
         public static bool TryParseHex(string input, ref int result)
         {
             result = 0;
+            int sign = 1;
             foreach (char c in input)
             {
                 if (c >= '0' && c <= '9')
@@ -18,9 +19,12 @@ namespace vlsiasm
                     result = result * 16 + c - 'a' + 10;
                 else if (c >= 'A' && c <= 'F')
                     result = result * 16 + c - 'A' + 10;
+                else if (c == '-')
+                    sign = -1;
                 else
                     return false;
             }
+            result *= sign;
             return true;
         }
         public static bool TryParseRegister(string input, ref int result)

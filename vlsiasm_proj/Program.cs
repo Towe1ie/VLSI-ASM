@@ -9,7 +9,7 @@ namespace vlsiasm
     class Program
     {
 
-        private static string orgToStr(int org)
+        private static string orgToStrDec(int org)
         {
             string tmp = Convert.ToString(org, 16);
             StringBuilder sb = new StringBuilder();
@@ -19,11 +19,11 @@ namespace vlsiasm
 
         static void Main(string[] args)
         {
-            if (args.Length != 1)
-            {
-                Console.WriteLine("Must have exactly one argument as input file name");
-                return;
-            }
+            //if (args.Length != 1)
+            //{
+            //    Console.WriteLine("Must have exactly one argument as input file name");
+            //    return;
+            //}
             Tokenizer t = null;
             InstructionRecorder ir = null;
             StringBuilder sb = new StringBuilder();
@@ -38,6 +38,9 @@ namespace vlsiasm
                     InstructionDescriptor desc = new InstructionDescriptor();
                     switch (token)
                     {
+                        case "org":
+                            org = Convert.ToInt32(ir.nextToken(), 16);
+                            break;
                         case "load":
                             desc.opcode = "000000";
                             break;
@@ -122,10 +125,15 @@ namespace vlsiasm
                         case "ble":
                             desc.opcode = "101101";
                             break;
+                        case "halt":
+                            desc.opcode = "111111";
+                            break;
                     }
                     switch (token)
                     {
                         case "load":
+                        case "addi":
+                        case "subi":
                             desc.type = InstructionType.DSI;
                             if (!Parser.TryParseRegister(token = ir.nextToken(), ref desc.rd))
                             {
@@ -142,15 +150,9 @@ namespace vlsiasm
                                 Console.WriteLine("Can't parse as immediate hex value " + token + ". At line: " + ir.lastTokenLine());
                                 break;
                             }
-                            sb.Append(orgToStr(org)).Append(' ').Append(InstructionSynthetizer.Synthetize(desc));
+                            sb.Append(orgToStrDec(org)).Append(' ').Append(InstructionSynthetizer.Synthetize(desc));
                             break;
                         case "store":
-                        case "beq":
-                        case "bnq":
-                        case "blt":
-                        case "bgt":
-                        case "ble":
-                        case "bge":
                             desc.type = InstructionType.ISSI;
                             if (!Parser.TryParseRegister(token = ir.nextToken(), ref desc.rs1))
                             {
@@ -167,7 +169,31 @@ namespace vlsiasm
                                 Console.WriteLine("Can't parse as register " + token + ". At line: " + ir.lastTokenLine());
                                 break;
                             }
-                            sb.Append(orgToStr(org)).Append(' ').Append(InstructionSynthetizer.Synthetize(desc));
+                            sb.Append(orgToStrDec(org)).Append(' ').Append(InstructionSynthetizer.Synthetize(desc));
+                            break;
+                        case "beq":
+                        case "bnq":
+                        case "blt":
+                        case "bgt":
+                        case "ble":
+                        case "bge":
+                            desc.type = InstructionType.ISSI;
+                            if (!Parser.TryParseRegister(token = ir.nextToken(), ref desc.rs1))
+                            {
+                                Console.WriteLine("Can't parse as register " + token + ". At line: " + ir.lastTokenLine());
+                                break;
+                            }
+                            if (!Parser.TryParseRegister(token = ir.nextToken(), ref desc.rs2))
+                            {
+                                Console.WriteLine("Can't parse as register " + token + ". At line: " + ir.lastTokenLine());
+                                break;
+                            }
+                            if (!Parser.TryParseHex(token = ir.nextToken(), ref desc.immediate))
+                            {
+                                Console.WriteLine("Can't parse as immediate hex value " + token + ". At line: " + ir.lastTokenLine());
+                                break;
+                            }
+                            sb.Append(orgToStrDec(org)).Append(' ').Append(InstructionSynthetizer.Synthetize(desc));
                             break;
                         case "and":
                         case "xor":
@@ -191,7 +217,7 @@ namespace vlsiasm
                                 Console.WriteLine("Can't parse as register " + token + ". At line: " + ir.lastTokenLine());
                                 break;
                             }
-                            sb.Append(orgToStr(org)).Append(' ').Append(InstructionSynthetizer.Synthetize(desc));
+                            sb.Append(orgToStrDec(org)).Append(' ').Append(InstructionSynthetizer.Synthetize(desc));
                             break;
                         case "shl":
                         case "shr":
@@ -209,7 +235,7 @@ namespace vlsiasm
                                 Console.WriteLine("Can't parse as immediate hex value " + token + ". At line: " + ir.lastTokenLine());
                                 break;
                             }
-                            sb.Append(orgToStr(org)).Append(' ').Append(InstructionSynthetizer.Synthetize(desc));
+                            sb.Append(orgToStrDec(org)).Append(' ').Append(InstructionSynthetizer.Synthetize(desc));
                             break;
                         case "mov":
                             desc.type = InstructionType.DSR;
@@ -223,7 +249,7 @@ namespace vlsiasm
                                 Console.WriteLine("Can't parse as register " + token + ". At line: " + ir.lastTokenLine());
                                 break;
                             }
-                            sb.Append(orgToStr(org)).Append(' ').Append(InstructionSynthetizer.Synthetize(desc));
+                            sb.Append(orgToStrDec(org)).Append(' ').Append(InstructionSynthetizer.Synthetize(desc));
                             break;
                         case "movi":
                             desc.type = InstructionType.DRI;
@@ -237,7 +263,7 @@ namespace vlsiasm
                                 Console.WriteLine("Can't parse as immediate hex value " + token + ". At line: " + ir.lastTokenLine());
                                 break;
                             }
-                            sb.Append(orgToStr(org)).Append(' ').Append(InstructionSynthetizer.Synthetize(desc));
+                            sb.Append(orgToStrDec(org)).Append(' ').Append(InstructionSynthetizer.Synthetize(desc));
                             break;
                         case "jmp":
                         case "jsr":
@@ -252,12 +278,12 @@ namespace vlsiasm
                                 Console.WriteLine("Can't parse as immediate hex value " + token + ". At line: " + ir.lastTokenLine());
                                 break;
                             }
-                            sb.Append(orgToStr(org)).Append(' ').Append(InstructionSynthetizer.Synthetize(desc));
+                            sb.Append(orgToStrDec(org)).Append(' ').Append(InstructionSynthetizer.Synthetize(desc));
                             break;
                         case "rts":
                         case "halt":
                             desc.type = InstructionType.NONE;
-                            sb.Append(orgToStr(org)).Append(' ').Append(InstructionSynthetizer.Synthetize(desc));
+                            sb.Append(orgToStrDec(org)).Append(' ').Append(InstructionSynthetizer.Synthetize(desc));
                             break;
                         case "pop":
                             desc.type = InstructionType.DR;
@@ -266,7 +292,7 @@ namespace vlsiasm
                                 Console.WriteLine("Can't parse as register " + token + ". At line: " + ir.lastTokenLine());
                                 break;
                             }
-                            sb.Append(orgToStr(org)).Append(' ').Append(InstructionSynthetizer.Synthetize(desc));
+                            sb.Append(orgToStrDec(org)).Append(' ').Append(InstructionSynthetizer.Synthetize(desc));
                             break;
                         case "push":
                             desc.type = InstructionType.RSR;
@@ -275,7 +301,11 @@ namespace vlsiasm
                                 Console.WriteLine("Can't parse as register " + token + ". At line: " + ir.lastTokenLine());
                                 break;
                             }
-                            sb.Append(orgToStr(org)).Append(' ').Append(InstructionSynthetizer.Synthetize(desc));
+                            sb.Append(orgToStrDec(org)).Append(' ').Append(InstructionSynthetizer.Synthetize(desc));
+                            break;
+                        case "org":
+                            sb.Append(orgToStrDec(org));
+                            org--;
                             break;
                         default:
                             org--;
@@ -283,7 +313,11 @@ namespace vlsiasm
                             break;
                     }
                     org++;
-                    sb.Append(" ; ").AppendLine(ir.getRecorded());
+                    sb.Append(" ; ").Append(ir.getRecorded());
+                    if (!ir.eof())
+                    {
+                        sb.AppendLine();
+                    }
                     ir.resetRecording();
                 }
             }
@@ -306,8 +340,19 @@ namespace vlsiasm
                     Console.WriteLine("Tokenizer is null, can't recover last line.");
                 }
             }
-            Console.WriteLine("Writing output to: " + args[0] + "o");
-            File.WriteAllText(args[0] + "o", sb.ToString());
+
+            String[] fileNameParts = args[0].Split('.', '\\');
+            String outFileName = null;
+            if (args.Length > 1)
+            {
+                outFileName = args[1];
+            }
+            else
+            {
+                outFileName = fileNameParts[fileNameParts.Length - 2] + "_out." + fileNameParts[fileNameParts.Length - 1];
+            }
+            Console.WriteLine("Writing output to: " + outFileName);
+            File.WriteAllText(outFileName, sb.ToString());
             Console.WriteLine("Assembling complete");
         }
     }
